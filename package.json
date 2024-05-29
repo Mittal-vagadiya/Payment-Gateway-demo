@@ -9,12 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "@paypal/react-paypal-js": "^8.3.0",
     "@stripe/react-stripe-js": "^2.7.1",
     "@stripe/stripe-js": "^3.4.1",
     "axios": "^1.7.2",
     "next": "14.2.3",
+    "razorpay": "^2.9.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-paypal-button-v2": "^2.6.3",
     "react-toastify": "^10.0.5",
     "stripe": "^15.8.0"
   },
