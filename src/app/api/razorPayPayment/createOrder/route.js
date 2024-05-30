@@ -10,10 +10,7 @@ let instance = new Razorpay({
     key_secret: NEXT_PUBLIC_RAZORPAY_SECRET_KEY,
 });
 
-const razorApi = 'https://api.razorpay.com/v1'
-
 export const POST = async (request) => {
-    // https://api.razorpay.com/v1/orders
     const reqBody = await request.json();
     const { amount } = reqBody;
 
@@ -28,8 +25,6 @@ export const POST = async (request) => {
         // Create order and send details to frontend
         const response = await instance.orders.create(options)
 
-        console.log('response :>> ', response);
-
         return NextResponse.json(
             {
                 success: true,
@@ -41,7 +36,6 @@ export const POST = async (request) => {
 
     } catch (err) {
         // Handle order creation failure
-        console.log('err :>> ', err);
         return NextResponse.json(
             {
                 error: 'Error in Initiating Payment',
