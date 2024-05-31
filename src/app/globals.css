@@ -31,3 +31,14 @@ body {
     text-wrap: balance;
   }
 }
+.AcceptUI{
+background-image: linear-gradient(to right, #00b8d4, #0083b0);
+  width: 100%;
+  padding: 8px 0px;
+  border-radius: 10px;
+  color: white;
+}
+
+*:disabled {
+  cursor :not-allowed;
+}

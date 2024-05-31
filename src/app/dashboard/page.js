@@ -9,8 +9,15 @@ import CheckoutForm from "./CheckoutForm/checkoutForm";
 import { useRouter } from "next/navigation";
 import { FUNDING, PayPalButtons } from "@paypal/react-paypal-js";
 import Script from "next/script";
+import { HostedForm } from 'react-acceptjs';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHER_KEY);
+
+const authData = {
+    apiLoginID: process.env.NEXT_PUBLIC_API_AUTHORISE_NET_LOGIN_ID,
+    clientKey: process.env.NEXT_PUBLIC_API_AUTHORISE_NET_PUBLIC_CLIENT_KEY,
+};
+
 
 export function page() {
 
@@ -19,7 +26,6 @@ export function page() {
     const [isStripe, setIsStripe] = useState(false)
 
     const router = useRouter()
-
 
     const options = {
         clientSecret: clientSecret,
@@ -46,15 +52,9 @@ export function page() {
             });
     };
 
-    // Function to handle Authorize.NET payment
-    const handleAuthorizeNetPayment = () => {
-        // Implement Authorize.NET payment logic here
-        toast.error("Authorize.NET payment functionality not implemented yet");
-    };
-
     const handleChange = (e) => {
-        setAmount(e.target.value);
-        localStorage.setItem("Amount", e.target.value)
+        setAmount(e.target.value < 0 ? 0 : e.target.value);
+        localStorage.setItem("Amount", e.target.value < 0 ? 0 : e.target.value)
     }
 
     const paymentIntent = new URLSearchParams(window.location.search).get(
@@ -131,7 +131,6 @@ export function page() {
         }
     }
 
-
     const razorPayCreateOrder = async () => {
 
         try {
@@ -200,6 +199,40 @@ export function page() {
         }
     };
 
+    useEffect(() => {
+        localStorage.removeItem("Amount");
+        setAmount("")
+    }, [])
+
+    const handleSubmit = async (response) => {
+        let data = {
+            price: amount,
+            opaqueDataForm: {
+                dataDescriptor: response.opaqueData.dataDescriptor,
+                dataValue: response.opaqueData.dataValue,
+            },
+            encryptedCardData: {
+                cardNumber: response.encryptedCardData.cardNumber,
+                expDate: response.encryptedCardData.expDate,
+                bin: response.encryptedCardData.bin
+            },
+            customerInformation: {
+                firstName: response.customerInformation.firstName,
+                lastName: response.customerInformation.lastName
+            }
+        }
+
+        try {
+            const res = await axios.post('http://localhost:3000/api/authNetPayment/chargeAmount', data);
+            console.log('res :>> ', res);
+            toast.success("Payment Successfull");
+        } catch (error) {
+            console.log('error :>> ', error);
+            toast.error('Error making payment');
+            console.error('Error making payment:', error);
+        }
+    };
+
     return (
         <>
             <Script src="https://checkout.razorpay.com/v1/checkout.js" />
@@ -230,11 +263,11 @@ export function page() {
                                         className="rounded-lg disabled:cursor-not-allowed"
                                         onApprove={(data, actions) => onApprove(data, actions)}
                                     />
-                                    <button type="button" onClick={handleAuthorizeNetPayment} disabled={!amount} className="w-full disabled:cursor-not-allowed bg-gradient-to-r from-cyan-400 to-cyan-600 text-white py-2 rounded-lg mx-auto block focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 mt-4 mb-4">Authorize.NET</button>
+
+                                    <HostedForm authData={authData} onSubmit={handleSubmit} buttonText={'Authorize.NET'} />
                                     <button type="button" onClick={razorPayCreateOrder} disabled={!amount} className="w-full disabled:cursor-not-allowed bg-gradient-to-r from-cyan-400 to-cyan-600 text-white py-2 rounded-lg mx-auto block focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 mt-4 mb-4">RazorPay</button>
                                 </div>
                             </div>
-
                     }
                 </div>
             </div>
